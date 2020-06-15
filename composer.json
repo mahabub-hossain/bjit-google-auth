@@ -1,0 +1,13 @@
+{
+    "name": "bjit/googleauth",
+    "description": "Google auth library",
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "mahabub.mollah",
+            "email": "mahabub.mollah@bjitgroup.com"
+        }
+    ],
+    "require": {}
+}
