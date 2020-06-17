@@ -7,6 +7,8 @@ class GoogleLogin
     protected $client_id;
     protected $client_secret;
     Protected $redirect_url;
+    protected $auth_url = "https://accounts.google.com/o/oauth2/v2/auth";
+    protected $accesstoken_url = "https://accounts.google.com/o/oauth2/token";
     public function __construct($config)
     {
         $this->config = $config;
@@ -17,34 +19,34 @@ class GoogleLogin
 
     //Getting url for user permission
     public function getUrl(){
-          $url = 'https://accounts.google.com/o/oauth2/v2/auth?scope=openid&include_granted_scopes=true&access_type=offline&response_type=code&client_id='.$this->client_id.'&redirect_uri='.$this->redirect_url;
-          return $url;
+        $url = $this->auth_url.'?scope=openid&include_granted_scopes=true&access_type=offline&response_type=code&client_id='.$this->client_id.'&redirect_uri='.$this->redirect_url;
+        return $url;
     }
     //This will provide  access tokent with expiry time
     public function getAccesstoken($code){
-          $curl = curl_init();
-          curl_setopt_array($curl, array(
-              CURLOPT_URL => "https://accounts.google.com/o/oauth2/token",
-              CURLOPT_RETURNTRANSFER => true,
-              CURLOPT_ENCODING => "",
-              CURLOPT_MAXREDIRS => 10,
-              CURLOPT_TIMEOUT => 30,
-              CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-              CURLOPT_CUSTOMREQUEST => "POST",
-              CURLOPT_POSTFIELDS => "grant_type=authorization_code&client_id=964615641200-bc6aakj87l295etqlmgieeqnhv5tmf0k.apps.googleusercontent.com&client_secret=QeQLgQ-xZiguFWL-EzKBgbfb&code=".$code."&redirect_uri=http://localhost/com/bjit/sns/php/google",
-              CURLOPT_HTTPHEADER => array(
-                  "content-type: application/x-www-form-urlencoded"
-              ),
-          ));
-          $response = curl_exec($curl);
-          $response = json_decode($response);
-          $err = curl_error($curl);
-          curl_close($curl);
-          if ($err) {
-              echo "cURL Error #:" . $err;
-          } else {
-              return $response;
-          }
+        $curl = curl_init();
+        curl_setopt_array($curl, array(
+            CURLOPT_URL => $this->accesstoken_url,
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_ENCODING => "",
+            CURLOPT_MAXREDIRS => 10,
+            CURLOPT_TIMEOUT => 30,
+            CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+            CURLOPT_CUSTOMREQUEST => "POST",
+            CURLOPT_POSTFIELDS => "grant_type=authorization_code&client_id=".$this->client_id."&client_secret=".$this->client_secret."&code=".$code."&redirect_uri=".$this->redirect_url,
+            CURLOPT_HTTPHEADER => array(
+                "content-type: application/x-www-form-urlencoded"
+            ),
+        ));
+        $response = curl_exec($curl);
+        $response = json_decode($response);
+        $err = curl_error($curl);
+        curl_close($curl);
+        if ($err) {
+            echo "cURL Error #:" . $err;
+        } else {
+            return $response;
+        }
 
     }
 
@@ -52,14 +54,14 @@ class GoogleLogin
     public function getRefreshtoken($refreshtoken){
         $curl = curl_init();
         curl_setopt_array($curl, array(
-            CURLOPT_URL => "https://accounts.google.com/o/oauth2/token",
+            CURLOPT_URL => $this->accesstoken_url,
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_ENCODING => "",
             CURLOPT_MAXREDIRS => 10,
             CURLOPT_TIMEOUT => 30,
             CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
             CURLOPT_CUSTOMREQUEST => "POST",
-            CURLOPT_POSTFIELDS => "grant_type=refresh_token&client_id=964615641200-bc6aakj87l295etqlmgieeqnhv5tmf0k.apps.googleusercontent.com&client_secret=QeQLgQ-xZiguFWL-EzKBgbfb&refresh_token=".$refreshtoken,
+            CURLOPT_POSTFIELDS => "grant_type=refresh_token&client_id=".$this->client_id."&client_secret=".$this->client_secret."&refresh_token=".$refreshtoken,
             CURLOPT_HTTPHEADER => array(
                 "content-type: application/x-www-form-urlencoded"
             ),
